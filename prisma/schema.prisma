@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+model Author {
+  id String @id @default(uuid())
+  username String
+  email String
+  password String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tokenVersion Int @default(0)
+  stories Story[]
+
+}
+
+model Story {
+  id String @id @default(uuid())
+  title String
+  description String
+  isPublished Boolean @default(false)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String
+  chapters Chapter[]
+} 
+
+
+model Chapter {
+  id String @id @default(uuid())
+  title String
+  description String
+  content String
+  isPublished Boolean @default(false)
+  story Story @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  storyId String
+}
