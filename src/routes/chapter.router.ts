@@ -1,32 +1,39 @@
 import { Request, Response, Router } from "express";
 import { auth } from "../middlewares/auth";
 import * as chapterService from "../services/chapter.service";
-import { JwtPayload } from "jsonwebtoken";
 import { verifyStoryOwnership } from "../services/story.service";
+import validate from "../middlewares/validate";
+import { chapterSchema } from "../validation/zod-schemas";
+
 const chapterRouter = Router();
 
-chapterRouter.post("/", auth, async (req: Request, res: Response) => {
-  try {
-    let isOwner = await verifyStoryOwnership(
-      req.body.storyId as string,
-      res.locals.token.userId
-    );
+chapterRouter.post(
+  "/",
+  auth,
+  validate(chapterSchema),
+  async (req: Request, res: Response) => {
+    try {
+      let isOwner = await verifyStoryOwnership(
+        req.body.storyId as string,
+        res.locals.token.userId
+      );
 
-    if (!isOwner) {
+      if (!isOwner) {
+        return res
+          .status(401)
+          .json({ message: "This story doesn't belong to you" });
+      }
+
+      const chapter = await chapterService.createChapter(req.body);
+
+      return res.status(201).json(chapter);
+    } catch (error) {
       return res
-        .status(401)
-        .json({ message: "This story doesn't belong to you" });
+        .status(500)
+        .json({ message: "Something wrong ocurred in the server" });
     }
-
-    const chapter = await chapterService.createChapter(req.body);
-
-    return res.status(201).json(chapter);
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Something wrong ocurred in the server" });
   }
-});
+);
 
 chapterRouter.delete("/:id", auth, async (req: Request, res: Response) => {
   try {
@@ -81,33 +88,40 @@ chapterRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
-chapterRouter.put("/:id", auth, async (req: Request, res: Response) => {
-  try {
-    const isOwner = await chapterService.verifyChapterOwnership(
-      req.params.id,
-      res.locals.token.userId
-    );
+chapterRouter.put(
+  "/:id",
+  auth,
+  validate(chapterSchema),
+  async (req: Request, res: Response) => {
+    try {
+      const isOwner = await chapterService.verifyChapterOwnership(
+        req.params.id,
+        res.locals.token.userId
+      );
 
-    if (!isOwner) {
+      if (!isOwner) {
+        return res
+          .status(401)
+          .json({ message: "You can't edit a chapter you don't own" });
+      }
+
+      console.log(req.body);
+      const updatedChapter = await chapterService.updateChapter({
+        ...req.body,
+        id: req.params.id,
+      });
+
+      if (!updatedChapter) {
+        return res.status(404).json({ message: "Chapter could not be found" });
+      }
+      return res.status(200).json(updatedChapter);
+    } catch (error: any) {
       return res
-        .status(401)
-        .json({ message: "You can't edit a chapter you don't own" });
+        .status(500)
+        .json({ message: "Something wrong ocurred in the server" });
     }
-    const updatedChapter = await chapterService.updateChapter({
-      ...req.body,
-      id: req.params.id,
-    });
-
-    if (!updatedChapter) {
-      return res.status(404).json({ message: "Chapter could not be found" });
-    }
-    return res.status(200).json(updatedChapter);
-  } catch (error: any) {
-    return res
-      .status(500)
-      .json({ message: "Something wrong ocurred in the server" });
   }
-});
+);
 
 // get chapters from a story
 chapterRouter.get("/", async (req: Request, res: Response) => {

@@ -78,6 +78,20 @@ export async function getStoryById(id: string) {
     where: {
       id,
     },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      isPublished: true,
+      authorId: true,
+      chapters: {
+        select: {
+          id: true,
+          title: true,
+          description: true,
+        },
+      },
+    },
   });
 }
 

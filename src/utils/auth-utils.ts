@@ -1,6 +1,8 @@
-import { Author } from "@prisma/client";
+import { Author } from "../types/interfaces";
 import jwt from "jsonwebtoken";
 import { CookieOptions, Response } from "express";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET!;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET!;
@@ -42,6 +44,7 @@ export function buildTokens(user: Author) {
   const refreshPayload = { userId: user.id, version: user.tokenVersion };
 
   const accessToken = signAccessToken(accessPayload);
+  //@ts-ignore
   const refreshToken = signRefreshToken(refreshPayload);
 
   return { accessToken, refreshToken };

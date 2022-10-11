@@ -36,6 +36,7 @@ model Story {
 
 model Chapter {
   id String @id @default(uuid())
+  wordCount Int @default(0)
   title String
   description String
   content String

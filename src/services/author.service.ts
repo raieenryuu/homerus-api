@@ -3,12 +3,7 @@ import { db } from "../utils/db.server";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-type Author = {
-  id: string;
-  username: string;
-  email: string;
-  createdAt: Date;
-};
+import { Author } from "../types/interfaces";
 
 export async function getAuthors(): Promise<Author[]> {
   const authors = await db.author.findMany({
@@ -65,7 +60,6 @@ export async function findAuthorByEmail(email: string) {
       username: true,
       email: true,
       createdAt: true,
-      updatedAt: true,
       password: true,
       tokenVersion: true,
     },

@@ -59,15 +59,17 @@ export async function updateChapter(chapter: {
   title: string;
   description: string;
   content: string;
+  wordCount: number;
 }) {
   try {
-    const { id, title, description, content } = chapter;
+    const { id, title, description, content, wordCount } = chapter;
     const updatedChapter = await db.chapter.update({
       where: { id },
       data: {
         title: title,
         description: description,
         content: content,
+        wordCount: wordCount,
       },
     });
 
@@ -90,6 +92,7 @@ export async function getChaptersByStoryId(storyId: string) {
       id: true,
       title: true,
       description: true,
+      wordCount: true,
       story: {
         select: {
           author: {
