@@ -25,10 +25,12 @@ storyRouter.post(
   validate(storySchema),
   async (req: Request, res: Response) => {
     try {
+      console.log("to aqui");
       const story = {
         ...req.body,
         authorId: res.locals.token.userId,
       };
+
       const createdStory = await storyService.createStory(story);
 
       return res.status(201).json(createdStory);

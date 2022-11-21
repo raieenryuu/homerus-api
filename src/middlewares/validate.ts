@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { AnyZodObject } from "zod";
+import { AnyZodObject, ZodError, ZodRecord } from "zod";
 
 const validate =
   (schema: AnyZodObject) =>
@@ -12,8 +12,10 @@ const validate =
       });
 
       return next();
-    } catch (error) {
-      return res.status(400).json(error);
+    } catch (error: any) {
+      return res
+        .status(400)
+        .json({ message: "Validation Error", errors: error.issues });
     }
   };
 

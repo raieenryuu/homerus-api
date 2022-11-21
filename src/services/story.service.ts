@@ -69,6 +69,7 @@ export async function getAuthorStories(authorId: string) {
       title: true,
       description: true,
       isPublished: true,
+      tags: true,
     },
   });
 }
